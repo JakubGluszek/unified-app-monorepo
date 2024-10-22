@@ -44,15 +44,18 @@ This monorepo contains a shared React package (`@repo/app`) that adapts to diffe
 
 ## What's Inside?
 
+### Source Application
+
+- `@repo/app`: Shared React `<App />` component
+
 ### Apps
 
 - `web`: Vite-powered React web application
 - `desktop`: Electron-Vite desktop application
 - `backend`: Bun-based backend service with Hono and tRPC
 
-### Packages
+### Other Packages
 
-- `@repo/app`: Shared React `<App />` component
 - `@repo/ui`: Shared UI components (powered by shadcn/ui)
 - `@repo/shared`: Reusable components, hooks, and API integrations
 - `@repo/typescript-config`: Base TypeScript configuration
@@ -100,7 +103,7 @@ pnpm dev --filter backend
 
 ### Building
 
-Build all apps:
+Build web & backend apps:
 
 ```sh
 pnpm build
@@ -126,11 +129,15 @@ This project uses Electron-builder to package and distribute the desktop applica
 
 To ensure secure builds and deployments, you need to set up the following secrets in your GitHub repository:
 
-1. `VITE_API_BASE_URL`: The URL of your deployed API server 
+1. `VITE_API_BASE_URL`: The URL of your deployed API server
 2. `AWS_ACCESS_KEY_ID`: Your AWS access key for S3 bucket access
 3. `AWS_SECRET_ACCESS_KEY`: Your AWS secret key for S3 bucket access
 4. `S3_BUCKET_NAME`: The name of your S3 bucket for storing builds
 5. `AWS_REGION`: The region of your S3 bucket, e.g `eu-north-1`
+6. `SERVER_SSH_PRIVATE_KEY`: The private key for SSH access to your server
+7. `SERVER_IP`: The IP address of your server
+8. `SERVER_USER`: The username for SSH access on your server
+9. `BACKEND_PORT`: Specify on which port should the backend app run
 
 To add these secrets:
 
@@ -145,8 +152,6 @@ This project uses Amazon S3 buckets for storing application builds. Here's how i
 1. **Build Storage**: Compiled application builds are uploaded to the specified S3 bucket.
 2. **Future Update Distribution**: Once implemented, the auto-update feature will fetch updates via the proxy server, which will retrieve files from the S3 bucket.
 
-Ensure that your S3 bucket is properly configured with the correct permissions and public access settings for seamless distribution.
-
 ## Adding UI Components
 
 To add new shadcn/ui components to your project, use the following command:
@@ -154,8 +159,6 @@ To add new shadcn/ui components to your project, use the following command:
 ```sh
 pnpm ui add <component-name>
 ```
-
-This command works similarly to the shadcn/ui CLI, allowing you to easily integrate new components into your project.
 
 ## Code Formatting
 
@@ -171,27 +174,66 @@ To check if your code is properly formatted without making changes, use:
 pnpm format:check
 ```
 
+## Deployment
+
+This project uses GitHub Actions for continuous deployment of the web and backend applications to a self-hosted Linux server. Here's an overview of the deployment process:
+
+### CI/CD Pipeline
+
+1. The pipeline is triggered on pushes to the `main` branch that affect the `web`, `backend`, or shared `packages`.
+2. It builds the web and backend applications using the project's build scripts.
+3. Only the compiled `dist` directories are deployed to the server.
+
+### Server Configuration
+
+- The deployment assumes PM2 is installed globally on the server for process management.
+- The web application is served using PM2's serve functionality.
+- The backend application is run as a Bun process managed by PM2.
+
+### Deployment Structure
+
+On the server, the applications are structured as follows:
+
+```
+~/app/
+└── backend/
+    ├── index.js
+    └── .env
+
+/var/www/html/web/
+├── index.html
+├── static/
+└── vite.svg
+```
+
 ## TODO
 
-- [ ] **Create Astro "site" App**: 
-   - [ ] Set up the `apps/site` directory for the Astro-based website.
-   - [ ] Develop the landing page with `/register` and `/login` routes.
+- [x] **Update `pnpm run clean` to use `pnpm` scripts instead of a shell script**
 
-- [ ] **Develop API for Authentication**: 
-   - [ ] Implement secure user authentication for the API application.
-   - [ ] Ensure integration with the Astro site, web app, and desktop app for login and registration.
+- [x] **Added workflow for deploying the `web` and `backend` apps**
+
+- [ ] **Create Astro "site" App**:
+
+  - [ ] Set up the `apps/site` directory for the Astro-based website.
+  - [ ] Develop the landing page with `/register` and `/login` routes.
+
+- [ ] **Develop API for Authentication**:
+
+  - [ ] Implement secure user authentication for the API application.
+  - [ ] Ensure integration with the Astro site, web app, and desktop app for login and registration.
 
 - [ ] **Enhance API App for Download Management**:
-   - [ ] Update `apps/api` to handle download request proxying:
-     - [ ] Implement rate limiting.
-     - [ ] Secure proxying of downloads from S3.
-   - [ ] Create endpoints for version info and update checks.
+
+  - [ ] Update `apps/api` to handle download request proxying:
+    - [ ] Implement rate limiting.
+    - [ ] Secure proxying of downloads from S3.
+  - [ ] Create endpoints for version info and update checks.
 
 - [ ] **Modify S3 setup to work with the new API proxy**
 
-- [ ] **Implement Auto-Update Functionality**: 
-   - [ ] Set up auto-update functionality for the desktop application.
-   - [ ] Configure Electron-builder for the new update mechanism.
+- [ ] **Implement Auto-Update Functionality**:
+  - [ ] Set up auto-update functionality for the desktop application.
+  - [ ] Configure Electron-builder for the new update mechanism.
 
 ## Contributing
 

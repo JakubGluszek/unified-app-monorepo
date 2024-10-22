@@ -3,8 +3,8 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "dev": "bun run --hot ./src/index.ts",
-    "build": "bun build --entrypoints ./src/index.ts --outdir ./dist",
+    "dev": "bun run --define process.env.NODE_ENV=\"'development'\" --hot ./src/index.ts",
+    "build": "bun build --define process.env.NODE_ENV=\"'production'\" --entrypoints ./src/index.ts --outdir ./dist",
     "typecheck": "tsc --noEmit -p tsconfig.json --composite false",
     "start": "bun run ./dist/index.js",
     "clean": "rm -rf ./node_modules/ ./dist/"

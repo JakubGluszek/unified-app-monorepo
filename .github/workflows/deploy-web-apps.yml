@@ -1,0 +1,84 @@
+name: Deploy Web and Backend
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/web/**'
+      - 'apps/backend/**'
+      - 'packages/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.17.0'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9.12.0
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Install Bun
+        run: curl -fsSL https://bun.sh/install | bash
+
+      - name: Add Bun to PATH
+        run: echo "$HOME/.bun/bin" >> $GITHUB_PATH
+
+      - name: Build web app
+        run: pnpm --filter web build
+        env:
+          VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
+
+      - name: Build backend app
+        run: |
+          # Create .env file for the backend build
+          echo "PORT=${{ secrets.BACKEND_PORT }}" > apps/backend/.env
+
+          # Build the backend with Bun and load .env variables
+          pnpm --filter backend build
+        env:
+          PORT: ${{ secrets.BACKEND_PORT }}
+
+      - name: Deploy to server
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SERVER_SSH_PRIVATE_KEY }}
+          SERVER_IP: ${{ secrets.SERVER_IP }}
+          SERVER_USER: ${{ secrets.SERVER_USER }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
+
+          # Create deployment directories with correct permissions
+          ssh $SERVER_USER@$SERVER_IP "sudo mkdir -p /var/www/html/web && sudo mkdir -p ~/app/backend"
+
+          # Set ownership for the web directory
+          ssh $SERVER_USER@$SERVER_IP "sudo chown -R $SERVER_USER:$SERVER_USER /var/www/html/web ~/app/backend"
+
+          # Copy web dist files to Apache directory
+          scp -r apps/web/dist/* $SERVER_USER@$SERVER_IP:/var/www/html/web
+
+          # Copy backend dist files
+          scp -r apps/backend/dist/* $SERVER_USER@$SERVER_IP:~/app/backend/
+          # Copy backend .env file
+          scp -r apps/backend/.env $SERVER_USER@$SERVER_IP:~/app/backend/
+
+          # Install dependencies and start/restart PM2 processes for the backend
+          ssh $SERVER_USER@$SERVER_IP "cd ~/app/backend && /home/ubuntu/.local/share/pnpm/pm2 restart backend || /home/ubuntu/.local/share/pnpm/pm2 start ./index.js --name backend --interpreter bun"
+
+          # Set appropriate permissions for Apache to serve the web app
+          ssh $SERVER_USER@$SERVER_IP "sudo chown -R www-data:www-data /var/www/html/web"
+
+      - name: Cleanup
+        if: always()
+        run: rm -f ~/.ssh/id_rsa

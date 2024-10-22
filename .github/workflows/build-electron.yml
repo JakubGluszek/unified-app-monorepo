@@ -65,6 +65,8 @@ jobs:
       - name: Build Electron for MacOS
         if: matrix.os == 'macos-latest'
         run: pnpm --filter desktop build:mac
+      - name: Clean up env
+        run: rm apps/desktop/.env
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:

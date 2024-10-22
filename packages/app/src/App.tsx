@@ -103,6 +103,7 @@ const App = ({ config }: { config: { appVersion?: string; isDev: boolean } }) =>
             >
               Github
             </a>
+            <p className="text-sm">v0.0.1</p>
           </div>
         </main>
       </div>
