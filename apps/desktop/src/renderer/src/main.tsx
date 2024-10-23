@@ -9,7 +9,7 @@ import { App } from '@repo/app';
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <TRPCReactProvider config={{ apiUrl: import.meta.env.VITE_API_BASE_URL }}>
-      <App config={{ isDev: import.meta.env.DEV, appVersion: import.meta.env.VITE_APP_VERSION }} />
+      <App config={{ isDev: import.meta.env.DEV, commitSHA: import.meta.env.VITE_COMMIT_SHA }} />
     </TRPCReactProvider>
   </React.StrictMode>
 );

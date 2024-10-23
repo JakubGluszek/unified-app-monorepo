@@ -3,7 +3,8 @@ import { electronAPI } from '@electron-toolkit/preload';
 
 // Custom APIs for renderer
 const api = {
-  showMessage: (message: string) => ipcRenderer.send('show-message', message)
+  showMessage: (message: string) => ipcRenderer.send('show-message', message),
+  getAppVersion: async () => await ipcRenderer.invoke('get-app-version')
 };
 
 // Use `contextBridge` APIs to expose Electron APIs to

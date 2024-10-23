@@ -17,6 +17,7 @@ import {
 import { ThemeProvider, ThemeToggle } from './components/theme';
 import StatusIcon from './components/status-icon';
 import { isElectron } from './utils';
+import { useEffect, useState } from 'react';
 
 const isDesktop = isElectron();
 
@@ -28,9 +29,20 @@ const showNativeDialog = () => {
   }
 };
 
-const App = ({ config }: { config: { appVersion?: string; isDev: boolean } }) => {
+const App = ({ config }: { config: { commitSHA?: string; isDev: boolean } }) => {
   const { isSuccess, isLoading } = api.greeting.useQuery();
+  const [appVersion, setAppVersion] = useState<string | undefined>(undefined);
 
+  useEffect(() => {
+    const fetchAppVersion = async () => {
+      if (isDesktop) {
+        const version = await window.api.getAppVersion();
+        setAppVersion(version);
+      }
+    };
+
+    fetchAppVersion();
+  }, []);
   return (
     <ThemeProvider defaultTheme="dark" storageKey="theme">
       <div className="min-h-screen h-full flex flex-col">
@@ -84,7 +96,7 @@ const App = ({ config }: { config: { appVersion?: string; isDev: boolean } }) =>
                 <div className="flex items-center gap-4">
                   <>
                     <FileLockIcon className="w-5 h-5" />
-                    {config.appVersion?.slice(0, 7) ?? 'No signature'}
+                    {config.commitSHA?.slice(0, 7) ?? 'Missing COMMIT_SHA'}
                   </>
                 </div>
               </>
@@ -103,7 +115,7 @@ const App = ({ config }: { config: { appVersion?: string; isDev: boolean } }) =>
             >
               Github
             </a>
-            <p className="text-sm">v0.0.1</p>
+            {isDesktop && <p className="text-sm">v{appVersion}</p>}
           </div>
         </main>
       </div>

@@ -28,7 +28,7 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     env:
-      VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
+      VITE_API_BASE_URL: ${{ secrets.API_BASE_URL }}
 
     steps:
       - uses: actions/checkout@v3
@@ -63,8 +63,8 @@ jobs:
       - name: Create .env file for desktop app
         run: |
           echo "NODE_ENV=production" >> apps/desktop/.env
-          echo "VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}" >> apps/desktop/.env
-          echo "GH_TOKEN=${{ secrets.GITHUB_TOKEN }}" >> apps/desktop/.env
+          echo "VITE_API_BASE_URL=${{ secrets.API_BASE_URL }}" >> apps/desktop/.env
+          echo "VITE_COMMIT_SHA=${{ secrets.GITHUB_TOKEN }}" >> apps/desktop/.env
 
       - name: Get version from package.json (Linux and macOS)
         if: matrix.os != 'windows-latest'
@@ -159,6 +159,6 @@ jobs:
     steps:
       - name: Clear backend releases metadata cache
         run: |
-          curl -X POST "${{ secrets.VITE_API_BASE_URL }}/api/releases/clear-cache" \
+          curl -X POST "${{ secrets.API_BASE_URL }}/api/releases/clear-cache" \
             -H "Authorization: Bearer ${{ secrets.AUTH_SECRET_ACCESS_KEY }}" \
             -H "Content-Type: application/json"

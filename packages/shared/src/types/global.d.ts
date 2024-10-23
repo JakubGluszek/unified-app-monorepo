@@ -4,7 +4,8 @@ declare global {
   interface Window {
     electron: ElectronAPI;
     api: {
-      showMessage: (message: string) => void;
+      showMessage: (message: string) => Promise<void>;
+      getAppVersion: () => Promise<string>;
     };
   }
 }
