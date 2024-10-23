@@ -20,7 +20,7 @@ const releases = new Hono().get(
   async (c) => {
     const { id, os, filename } = c.req.valid('param');
     // Fetch S3 bucket
-    const result = await getObject(`download/${id}/${os}/${filename}`);
+    const result = await getObject(`download/releases/${id}/${os}/${filename}`);
 
     // Handle error
     if (result.isErr()) {
