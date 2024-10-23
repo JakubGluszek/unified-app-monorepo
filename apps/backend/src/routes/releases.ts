@@ -54,18 +54,19 @@ const releases = new Hono()
     }
   )
   .get(
-    '/:id/download/:filename',
+    '/:id/download/:os/:filename',
     zValidator(
       'param',
       z.object({
         id: z.string().min(1),
+        os: z.enum(['linux', 'windows', 'mac']),
         filename: z.string().min(1)
       })
     ),
     async (c) => {
-      const { id, filename } = c.req.valid('param');
+      const { id, os, filename } = c.req.valid('param');
       // Fetch S3 bucket
-      const result = await getObject(`releases/${id}/${filename}`);
+      const result = await getObject(`releases/${id}/${os}/${filename}`);
 
       // Handle error
       if (result.isErr()) {
@@ -94,15 +95,33 @@ const releases = new Hono()
 
       const webStream = fileStream.transformToWebStream();
 
+      const start = performance.now();
       return stream(
         c,
         async (streamController) => {
+          // Logging
+          log({ log: `Download - Started - ${filename}` });
+
+          // Pipe the response stream
           await streamController.pipe(webStream);
+
+          // Logging
+          const end = performance.now();
+          log({
+            log: `Download - Finished - ${filename} `,
+            duration: end - start
+          });
         },
         async (_, streamController) => {
+          const end = performance.now();
+          log({
+            log: `Download - Closing connection - ${filename} `,
+            duration: end - start
+          });
           // Destroy the stream
           await streamController.close();
-          log({ log: `Log: Stream closed on error: ${streamController.closed}` });
+          !streamController.closed &&
+            log({ log: `Download - Error - ${filename} - Failed to close the stream controller` });
         }
       );
     }
