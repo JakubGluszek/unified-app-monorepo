@@ -6,28 +6,29 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "typecheck": "tsc --noEmit -p tsconfig.json --composite false",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
     "preview": "vite preview",
     "clean": "rm -rf ./node_modules/ ./dist"
   },
   "dependencies": {
-    "@repo/ui": "workspace:*",
-    "@repo/shared": "workspace:*",
     "@repo/app": "workspace:*",
+    "@repo/shared": "workspace:*",
+    "@repo/ui": "workspace:*",
     "react": "catalog:react18",
     "react-dom": "catalog:react18"
   },
   "devDependencies": {
     "@repo/typescript-config": "workspace:*",
-    "vite": "catalog:",
-    "@vitejs/plugin-react": "catalog:",
-    "postcss": "catalog:",
-    "tailwindcss": "catalog:",
-    "autoprefixer": "catalog:",
+    "@types/bun": "^1.1.12",
     "@types/node": "catalog:",
     "@types/react": "catalog:react18",
     "@types/react-dom": "catalog:react18",
+    "@vitejs/plugin-react": "catalog:",
+    "autoprefixer": "catalog:",
+    "globals": "^15.9.0",
+    "postcss": "catalog:",
+    "tailwindcss": "catalog:",
     "typescript": "catalog:",
-    "globals": "^15.9.0"
+    "vite": "catalog:"
   }
 }

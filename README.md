@@ -212,6 +212,8 @@ On the server, the applications are structured as follows:
 
 - [x] **Added workflow for deploying the `web` and `backend` apps**
 
+- [ ] **Develop API for downloading releases**
+
 - [ ] **Create Astro "site" App**:
 
   - [ ] Set up the `apps/site` directory for the Astro-based website.

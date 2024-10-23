@@ -5,7 +5,7 @@ import { type inferRouterInputs, type inferRouterOutputs } from '@trpc/server';
 import { useState } from 'react';
 import SuperJSON from 'superjson';
 
-import { type AppRouter } from 'backend/src/api/trpc/index';
+import { type AppRouter } from 'backend';
 import { createQueryClient } from './query-client';
 
 let clientQueryClientSingleton: QueryClient | undefined = undefined;

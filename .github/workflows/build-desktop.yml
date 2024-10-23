@@ -1,0 +1,157 @@
+name: Build Electron App and Upload to S3
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/app/**'
+      - 'packages/ui/**'
+      - 'packages/shared/**'
+      - 'apps/desktop/**'
+
+  pull_request:
+    branches: [main]
+    paths:
+      - 'packages/app/**'
+      - 'packages/ui/**'
+      - 'packages/shared/**'
+      - 'apps/desktop/**'
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    runs-on: ${{ matrix.os }}
+
+    env:
+      VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.17.0'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9.12.0
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - uses: actions/cache@v3
+        name: Setup pnpm cache
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Create .env file for desktop app
+        run: |
+          echo "NODE_ENV=production" >> apps/desktop/.env
+          echo "VITE_API_BASE_URL=${{ secrets.VITE_API_BASE_URL }}" >> apps/desktop/.env
+          echo "GH_TOKEN=${{ secrets.GITHUB_TOKEN }}" >> apps/desktop/.env
+
+      - name: Get version from package.json (Linux and macOS)
+        if: matrix.os != 'windows-latest'
+        run: echo "APP_VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
+        shell: bash
+
+      - name: Get version from package.json (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          $version = node -p "require('./package.json').version"
+          echo "APP_VERSION=$version" >> $env:GITHUB_ENV
+        shell: pwsh
+
+      - name: Check APP_VERSION
+        run: echo "APP_VERSION=${{ env.APP_VERSION }}"
+
+      - name: Build Electron app
+        run: pnpm --filter desktop build
+
+      - name: Build Electron for Linux
+        if: matrix.os == 'ubuntu-latest'
+        run: pnpm --filter desktop build:linux
+
+      - name: Build Electron for Windows
+        if: matrix.os == 'windows-latest'
+        run: pnpm --filter desktop build:win
+
+      - name: Build Electron for MacOS
+        if: matrix.os == 'macos-latest'
+        run: pnpm --filter desktop build:mac
+
+      - name: Clean up env
+        run: rm apps/desktop/.env
+
+      - name: Reorganize build output for Linux
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          mkdir -p apps/desktop/dist/linux apps/desktop/dist/unpacked
+
+          mv apps/desktop/dist/*.AppImage apps/desktop/dist/linux/ || true
+          mv apps/desktop/dist/*.deb apps/desktop/dist/linux/ || true
+          mv apps/desktop/dist/*.snap apps/desktop/dist/linux/ || true
+          mv apps/desktop/dist/latest-linux.yml apps/desktop/dist/linux/latest.yml || true
+          mv apps/desktop/dist/linux-unpacked apps/desktop/dist/unpacked/linux || true
+
+      - name: Reorganize build output for Windows
+        if: matrix.os == 'windows-latest'
+        run: |
+          New-Item -ItemType Directory -Path "apps/desktop/dist/windows" -Force
+          New-Item -ItemType Directory -Path "apps/desktop/dist/unpacked" -Force
+          New-Item -ItemType Directory -Path "apps/desktop/dist/unpacked/windows" -Force
+
+          Move-Item -Path "apps/desktop/dist/*.exe" -Destination "apps/desktop/dist/windows/" -ErrorAction SilentlyContinue
+          Move-Item -Path "apps/desktop/dist/*.blockmap" -Destination "apps/desktop/dist/windows/" -ErrorAction SilentlyContinue
+          Move-Item -Path "apps/desktop/dist/latest.yml" -Destination "apps/desktop/dist/windows/" -ErrorAction SilentlyContinue
+          Move-Item -Path "apps/desktop/dist/win-unpacked/*" -Destination "apps/desktop/dist/unpacked/windows" -ErrorAction SilentlyContinue
+
+      - name: Reorganize build output for MacOS
+        if: matrix.os == 'macos-latest'
+        run: |
+          mkdir -p apps/desktop/dist/mac apps/desktop/dist/unpacked
+
+          mv apps/desktop/dist/*.dmg apps/desktop/dist/mac/ || true
+          mv apps/desktop/dist/*.zip apps/desktop/dist/mac/ || true
+          mv apps/desktop/dist/latest-mac.yml apps/desktop/dist/mac/latest.yml || true
+          mv apps/desktop/dist/mac-arm64 apps/desktop/dist/unpacked/mac || true
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Upload builds to S3 for Linux
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          aws s3 cp apps/desktop/dist/linux/ s3://${{ secrets.S3_BUCKET_NAME }}/releases/${{ env.APP_VERSION }}/linux/ --recursive
+
+      - name: Upload builds to S3 for Windows
+        if: matrix.os == 'windows-latest'
+        run: |
+          aws s3 cp apps/desktop/dist/windows/ s3://${{ secrets.S3_BUCKET_NAME }}/releases/${{ env.APP_VERSION }}/windows/ --recursive
+
+      - name: Upload builds to S3 for MacOS
+        if: matrix.os == 'macos-latest'
+        run: |
+          aws s3 cp apps/desktop/dist/mac/ s3://${{ secrets.S3_BUCKET_NAME }}/releases/${{ env.APP_VERSION }}/mac/ --recursive
+
+      - name: Upload unpacked files to S3
+        run: |
+          aws s3 cp apps/desktop/dist/unpacked/ s3://${{ secrets.S3_BUCKET_NAME }}/releases/${{ env.APP_VERSION }}/unpacked/${{ matrix.os }}/ --recursive

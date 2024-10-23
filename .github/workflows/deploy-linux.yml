@@ -1,4 +1,4 @@
-name: Deploy Web and Backend
+name: Deploy Web Apps To Linux
 
 on:
   push:
@@ -38,15 +38,18 @@ jobs:
         env:
           VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
 
+      - name: Create .env file for backend app
+        run: |
+          echo "PORT=${{ secrets.BACKEND_PORT }}" >> apps/backend/.env
+          echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> apps/backend/.env
+          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> apps/backend/.env
+          echo "AWS_REGION=${{ secrets.AWS_REGION }}" >> apps/backend/.env
+          echo "S3_BUCKET_NAME=${{ secrets.S3_BUCKET_NAME }}" >> apps/backend/.env
+          echo "REDIS_URL=${{ secrets.REDIS_URL }}" >> apps/backend/.env
+
       - name: Build backend app
         run: |
-          # Create .env file for the backend build
-          echo "PORT=${{ secrets.BACKEND_PORT }}" > apps/backend/.env
-
-          # Build the backend with Bun and load .env variables
           pnpm --filter backend build
-        env:
-          PORT: ${{ secrets.BACKEND_PORT }}
 
       - name: Deploy to server
         env:
@@ -66,15 +69,15 @@ jobs:
           ssh $SERVER_USER@$SERVER_IP "sudo chown -R $SERVER_USER:$SERVER_USER /var/www/html/web ~/app/backend"
 
           # Copy web dist files to Apache directory
-          scp -r apps/web/dist/* $SERVER_USER@$SERVER_IP:/var/www/html/web
+          scp -r apps/web/dist $SERVER_USER@$SERVER_IP:/var/www/html/web
 
           # Copy backend dist files
-          scp -r apps/backend/dist/* $SERVER_USER@$SERVER_IP:~/app/backend/
+          scp -r apps/backend/dist $SERVER_USER@$SERVER_IP:~/app/backend
           # Copy backend .env file
-          scp -r apps/backend/.env $SERVER_USER@$SERVER_IP:~/app/backend/
+          scp -r apps/backend/.env $SERVER_USER@$SERVER_IP:~/app/backend/.env
 
           # Install dependencies and start/restart PM2 processes for the backend
-          ssh $SERVER_USER@$SERVER_IP "cd ~/app/backend && /home/ubuntu/.local/share/pnpm/pm2 restart backend || /home/ubuntu/.local/share/pnpm/pm2 start ./index.js --name backend --interpreter bun"
+          ssh $SERVER_USER@$SERVER_IP "cd ~/app/backend && /home/ubuntu/.local/share/pnpm/pm2 restart backend || /home/ubuntu/.local/share/pnpm/pm2 start ./dist/index.js --name backend --interpreter bun"
 
           # Set appropriate permissions for Apache to serve the web app
           ssh $SERVER_USER@$SERVER_IP "sudo chown -R www-data:www-data /var/www/html/web"

@@ -5,6 +5,8 @@ import icon from '../../resources/icon.png?asset';
 
 let mainWindow: BrowserWindow;
 
+console.log(app.getVersion());
+
 function createWindow(): void {
   // Create the browser window.
   mainWindow = new BrowserWindow({

@@ -6,7 +6,8 @@
     "emitDeclarationOnly": true,
     "moduleResolution": "bundler",
     "types": [
-      "vite/client"
+      "vite/client",
+      "bun"
     ]
   },
   "include": [

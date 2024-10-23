@@ -7,8 +7,8 @@
   "homepage": "https://electron-vite.org",
   "scripts": {
     "format": "prettier --write .",
-    "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false",
-    "typecheck:web": "tsc --noEmit -p tsconfig.web.json --composite false",
+    "typecheck:node": "tsc --noEmit -p tsconfig.node.json",
+    "typecheck:web": "tsc --noEmit -p tsconfig.web.json",
     "typecheck": "pnpm run typecheck:node && pnpm run typecheck:web",
     "start": "electron-vite preview",
     "desktop:dev": "electron-vite dev",
@@ -23,14 +23,15 @@
   "dependencies": {
     "@electron-toolkit/preload": "catalog:",
     "@electron-toolkit/utils": "^3.0.0",
+    "@repo/app": "workspace:*",
     "@repo/shared": "workspace:*",
     "@repo/ui": "workspace:*",
-    "@repo/app": "workspace:*",
     "electron-updater": "^6.1.7"
   },
   "devDependencies": {
     "@electron-toolkit/tsconfig": "^1.0.1",
     "@repo/typescript-config": "workspace:*",
+    "@types/bun": "^1.1.12",
     "@types/node": "^20.14.8",
     "@types/react": "catalog:react18",
     "@types/react-dom": "catalog:react18",
