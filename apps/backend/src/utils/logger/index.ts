@@ -3,5 +3,6 @@ export const log = (message: any) => {
   if (typeof msg === 'object') {
     msg = JSON.stringify(msg);
   }
-  console.log(msg);
+  const timestamp = new Date().toLocaleString();
+  console.log(timestamp, msg);
 };

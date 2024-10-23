@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.0.0",
+    "@aws-sdk/s3-request-presigner": "^3.677.0",
     "@hono/trpc-server": "^0.3.2",
     "@hono/zod-validator": "^0.1.0",
     "@sinclair/typebox": "^0.31.0",

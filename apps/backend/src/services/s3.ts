@@ -1,4 +1,5 @@
 import { _Object, GetObjectCommand, ListObjectsV2Command, S3Client } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { StatusCode } from 'hono/utils/http-status';
 import { err, ok, ResultAsync } from 'neverthrow';
 import { createError } from '../errors/s3';
@@ -12,6 +13,18 @@ const s3Client = new S3Client({
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
   }
 });
+
+// Generate a signed URL for a specified S3 object
+export const generateSignedUrl = async (key: string, expiresIn: number = 60) => {
+  const command = new GetObjectCommand({
+    Bucket: process.env.S3_BUCKET_NAME!,
+    Key: key
+  });
+
+  // Generate the signed URL
+  const signedUrl = await getSignedUrl(s3Client, command, { expiresIn });
+  return signedUrl;
+};
 
 export const getObject = (key: string) =>
   ResultAsync.fromPromise(

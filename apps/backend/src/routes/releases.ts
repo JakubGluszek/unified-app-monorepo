@@ -70,10 +70,10 @@ const releases = new Hono()
       const deleteResults = await Promise.all(keys.map((key) => redisClient.del(key)));
 
       message = `Cleared ${deleteResults.length} cache entries for keys starting with "${pattern}".`;
-      log({ log: message });
+      log({ cache: message });
     } else {
       message = `No cache keys found matching pattern "${pattern}".`;
-      log({ log: message });
+      log({ cache: message });
     }
 
     redisPool.release(redisClient);
