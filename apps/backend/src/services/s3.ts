@@ -6,10 +6,10 @@ import { getRedisClient, redisPool } from '../redis-client';
 import { log } from '../utils/logger';
 
 const s3Client = new S3Client({
-  region: process.env.AWS_REGION as string,
+  region: process.env.AWS_REGION,
   credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID as string,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY as string
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
   }
 });
 
@@ -24,7 +24,7 @@ export const getObject = (key: string) =>
     () => createError('NotFound')
   );
 
-export const listObjects = async (prefix: string, depth: number = 3) => {
+export const listObjects = async (prefix: string, depth: number = 4) => {
   const redisClient = await getRedisClient();
   const cacheKey = `s3-${prefix}-${depth}`;
 

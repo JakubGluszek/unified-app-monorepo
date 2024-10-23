@@ -15,7 +15,7 @@ const getReleaseIdFromS3Object = (object: _Object) => {
       return error;
     });
 
-  const releaseId = object.Key.split('/')[1];
+  const releaseId = object.Key.split('/')[2];
   if (!releaseId) return err(createError('Internal'));
   return ok(releaseId);
 };
@@ -59,7 +59,7 @@ export const parseReleaseFromS3Objects = (objects: _Object[]) => {
 export const parseReleasesFromS3Objects = (objects: _Object[]) => {
   // Transform objects into groups by release id
   const releaseGroups = objects.reduce((acc: { [key: string]: _Object[] }, obj) => {
-    const releaseId = obj.Key?.split('/')[1];
+    const releaseId = obj.Key?.split('/')[2];
     if (releaseId) {
       if (!acc[releaseId]) acc[releaseId] = [];
       acc[releaseId].push(obj);
