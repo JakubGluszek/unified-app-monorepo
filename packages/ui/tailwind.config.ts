@@ -7,7 +7,7 @@ const config = {
     './pages/**/*.{ts,tsx}',
     './components/**/*.{ts,tsx}',
     './app/**/*.{ts,tsx}',
-    './src/**/*.{ts,tsx}',
+    './src/**/*.{astro,html,ts,tsx}',
     '../../packages/ui/src/**/*.{ts,tsx}',
     '../../packages/app/src/**/*.{ts,tsx}'
   ],

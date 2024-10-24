@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "bun run --define process.env.NODE_ENV=\"'development'\" --hot ./src/index.ts",
     "build": "bun build --define process.env.NODE_ENV=\"'production'\" --entrypoints ./src/index.ts --outdir ./dist --target=bun",
-    "typecheck": "tsc --noEmit -p tsconfig.json --composite false",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
     "start": "bun run ./dist/index.js",
     "clean": "rm -rf ./node_modules/ ./dist/"
   },
