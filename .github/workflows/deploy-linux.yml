@@ -76,21 +76,24 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
 
-          # If non existent, create deployment directories
+          # If non-existent, create deployment directories
           ssh $SERVER_USER@$SERVER_IP "sudo mkdir -p /var/www/html/web /var/www/html/site ~/app/backend"
 
           # Set ownership over the directories
           ssh $SERVER_USER@$SERVER_IP "sudo chown -R $SERVER_USER:$SERVER_USER /var/www/html/web /var/www/html/site ~/app/backend"
 
+          # Clean up existing dist directories to avoid nesting issues
+          ssh $SERVER_USER@$SERVER_IP "sudo rm -rf /var/www/html/web/* /var/www/html/site/* ~/app/backend/*"
+
           # Copy web dist files
-          scp -r apps/web/dist $SERVER_USER@$SERVER_IP:/var/www/html/web
+          rsync -avz --delete apps/web/dist/ $SERVER_USER@$SERVER_IP:/var/www/html/web/
 
           # Copy site dist files
-          scp -r apps/site/dist $SERVER_USER@$SERVER_IP:/var/www/html/site
+          rsync -avz --delete apps/site/dist/ $SERVER_USER@$SERVER_IP:/var/www/html/site/
 
           # Copy backend dist files & .env
-          scp -r apps/backend/dist $SERVER_USER@$SERVER_IP:~/app/backend
-          scp -r apps/backend/.env $SERVER_USER@$SERVER_IP:~/app/backend/.env
+          rsync -avz --delete apps/backend/dist/ $SERVER_USER@$SERVER_IP:~/app/backend/
+          rsync -avz apps/backend/.env $SERVER_USER@$SERVER_IP:~/app/backend/.env
 
           # Start/restart PM2 process & reload nginx
           ssh $SERVER_USER@$SERVER_IP << 'EOF'
