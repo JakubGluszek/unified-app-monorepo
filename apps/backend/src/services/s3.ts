@@ -1,16 +1,16 @@
-import { _Object, GetObjectCommand, ListObjectsV2Command, S3Client } from '@aws-sdk/client-s3';
+import { type _Object, GetObjectCommand, ListObjectsV2Command, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { StatusCode } from 'hono/utils/http-status';
+import { type StatusCode } from 'hono/utils/http-status';
 import { err, ok, ResultAsync } from 'neverthrow';
 import { createError } from '../errors/s3';
 import { getRedisClient, redisPool } from '../redis-client';
 import { log } from '../utils/logger';
 
 const s3Client = new S3Client({
-  region: process.env.AWS_REGION,
+  region: process.env.AWS_REGION as string,
   credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID as string,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY as string
   }
 });
 
@@ -45,6 +45,7 @@ export const listObjects = async (prefix: string, depth: number = 4) => {
   const cachedData: string | null = await redisClient.get(cacheKey);
   if (cachedData) {
     log({ log: `Cache: Using existing cache key "${cacheKey}"` });
+    await redisPool.release(redisClient);
     return ok(JSON.parse(cachedData) as _Object[]);
   }
 

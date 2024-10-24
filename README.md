@@ -79,11 +79,7 @@ This monorepo contains a shared React package (`@repo/app`) that adapts to diffe
    ```sh
    pnpm install
    ```
-3. Set up environment variables:
-   ```sh
-   chmod +x ./scripts/generate-env.sh
-   pnpm generate-env
-   ```
+3. Set up environment variables
 
 ### Development
 

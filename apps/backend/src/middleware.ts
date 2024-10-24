@@ -1,4 +1,4 @@
-import { Context, MiddlewareHandler } from 'hono';
+import { type Context, type MiddlewareHandler } from 'hono';
 import { RateLimiterMemory } from 'rate-limiter-flexible';
 import { createError } from './errors/s3';
 
@@ -8,7 +8,6 @@ interface RateLimitConfig {
   keyGenerator?: (c: Context) => string;
 }
 
-// Create a rate limiter factory
 const createRateLimiter = (config: RateLimitConfig) => {
   const limiter = new RateLimiterMemory({
     points: config.points,
@@ -39,5 +38,4 @@ export const createDownloadRateLimit = (config: RateLimitConfig): MiddlewareHand
   return createRateLimiter(config);
 };
 
-// Export types for use in routes
 export type { RateLimitConfig };

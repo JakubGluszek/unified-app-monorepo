@@ -1,27 +1,28 @@
 # Dependencies
-node_modules
-.pnp
+node_modules/
+.pnp/
 .pnp.js
 
-# Local env files
+# Local environment files
 .env
 .env*.local
+.env.production
 
 # Testing
-coverage
+coverage/
 
 # Turbo
-.turbo
+.turbo/
 
 # Vercel
-.vercel
+.vercel/
 
 # Build Outputs
 .next/
 out/
-build
-dist
-dist-ssr
+build/
+dist/
+dist-ssr/
 
 # Debug
 npm-debug.log*
@@ -31,13 +32,13 @@ pnpm-debug.log*
 lerna-debug.log*
 
 # Logs
-logs
+logs/
 *.log
 
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
-.idea
+.idea/
 *.suo
 *.ntvs*
 *.njsproj
@@ -54,3 +55,10 @@ next-env.d.ts
 
 # Electron specific
 out/
+
+# Generated types
+.astro/
+
+# macOS-specific files
+.DS_Store
+

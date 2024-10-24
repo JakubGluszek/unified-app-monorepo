@@ -1,0 +1,14 @@
+# This wouldn't work properly in root
+plugins:
+  - prettier-plugin-astro
+
+overrides:
+  - files: '*.astro'
+    options:
+      parser: astro
+
+# I have to re-define these root rules here too
+singleQuote: true
+semi: true
+printWidth: 100
+trailingComma: none

@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
+import { HTTPException } from "hono/http-exception";
 import { z } from 'zod';
 import { listObjects } from '../services/s3';
 import { parseReleasesFromS3Objects, parseReleaseFromS3Objects } from '../utils';
@@ -11,7 +12,7 @@ const releases = new Hono()
     // Fetch S3 storage
     const result = await listObjects('download/releases/');
     // Handle error
-    if (result.isErr()) return c.json(result.error, result.error.status);
+    if (result.isErr()) throw new HTTPException(result.error.status, { message: result.error.message })
     // Parse releases
     const releases = parseReleasesFromS3Objects(result.value);
 
@@ -24,13 +25,13 @@ const releases = new Hono()
     // Fetch S3 bucket
     const result = await listObjects('download/releases/');
     // Handle error
-    if (result.isErr()) return c.json(result.error, result.error.status);
+    if (result.isErr()) throw new HTTPException(result.error.status, { message: result.error.message })
     // Parse releases
     const releases = parseReleasesFromS3Objects(result.value);
     // Sort by the most recent release date
     const sortedReleases = releases.sort((a, b) => (a.timestamp! > b.timestamp! ? 1 : -1));
     // Return most recent release
-    return c.json(sortedReleases[0]);
+    return c.json(sortedReleases[0], 200);
   })
   .get(
     '/:id',
@@ -45,10 +46,9 @@ const releases = new Hono()
       // Fetch S3 bucket
       const result = await listObjects('download/releases/' + id);
       // Handle error
-      if (result.isErr()) return c.json(result.error, result.error.status);
-      // Parse releases
+      if (result.isErr()) throw new HTTPException(result.error.status, { message: result.error.message })
+      // Parse and return release
       const release = parseReleaseFromS3Objects(result.value);
-
       return c.json(release);
     }
   )

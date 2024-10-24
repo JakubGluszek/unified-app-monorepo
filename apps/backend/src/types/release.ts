@@ -16,7 +16,7 @@ export interface Release {
     windows: {
       exe?: string;
     };
-    macos: {
+    mac: {
       dmg?: string;
     };
   };

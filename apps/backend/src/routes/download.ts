@@ -5,6 +5,7 @@ import { log } from '../utils/logger';
 import { generateSignedUrl } from '../services/s3';
 import { createError } from '../errors/s3';
 import { getRedisClient } from '../redis-client';
+import { HTTPException } from 'hono/http-exception';
 
 const releases = new Hono().get(
   '/:id/:os/:filename',
@@ -34,7 +35,8 @@ const releases = new Hono().get(
     // Handle error
     if (!signedUrl) {
       log({ log: `Failed to generate signed URL for "${filename}"` });
-      return c.json(createError('Internal'), 500);
+      const error = createError('Internal')
+      throw new HTTPException(error.status, { message: error.message })
     }
 
     // Cache the signed URL

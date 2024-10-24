@@ -1,4 +1,4 @@
-import { StatusCode } from 'hono/utils/http-status';
+import { type StatusCode } from 'hono/utils/http-status';
 
 export const s3Error = {
   NotFound: { status: 404 as StatusCode, message: 'Resource not found' },

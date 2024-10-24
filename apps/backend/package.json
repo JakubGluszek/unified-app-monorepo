@@ -4,10 +4,10 @@
   "main": "./src/index.ts",
   "type": "module",
   "scripts": {
-    "dev": "bun run --define process.env.NODE_ENV=\"'development'\" --hot ./src/index.ts",
-    "build": "bun build --define process.env.NODE_ENV=\"'production'\" --entrypoints ./src/index.ts --outdir ./dist --target=bun",
+    "dev": "bun run --hot ./src/index.ts",
+    "build": "bun build --compile --minify --sourcemap ./src/index.ts --outfile dist/backend --target=bun-linux-x64-baseline --define process.env.NODE_ENV='\"production\"'",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "start": "bun run ./dist/index.js",
+    "start": "./dist/backend",
     "clean": "rm -rf ./node_modules/ ./dist/"
   },
   "dependencies": {

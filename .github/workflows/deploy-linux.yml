@@ -1,5 +1,4 @@
 name: Deploy Web Apps To Linux
-
 on:
   push:
     branches: [main]
@@ -17,7 +16,6 @@ on:
       - 'apps/backend/**'
       - 'apps/site/**'
       - 'packages/**'
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -50,6 +48,9 @@ jobs:
 
       - name: Build site app
         run: pnpm --filter site build
+        env:
+          PUBLIC_API_BASE_URL: ${{ secrets.API_BASE_URL }}
+          PUBLIC_APP_BASE_URL: ${{ secrets.APP_BASE_URL }}
 
       - name: Create .env file for backend app
         run: |
@@ -61,9 +62,8 @@ jobs:
           echo "REDIS_URL=${{ secrets.REDIS_URL }}" >> apps/backend/.env
           echo "AUTH_SECRET_ACCESS_KEY=${{ secrets.AUTH_SECRET_ACCESS_KEY }}" >> apps/backend/.env
 
-      - name: Build backend app
-        run: |
-          pnpm --filter backend build
+      - name: Build backend app (compiled binary)
+        run: pnpm --filter backend build
 
       - name: Deploy to server
         env:
@@ -76,34 +76,33 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H $SERVER_IP >> ~/.ssh/known_hosts
 
-          # If non-existent, create deployment directories
-          ssh $SERVER_USER@$SERVER_IP "sudo mkdir -p /var/www/html/web /var/www/html/site ~/app/backend"
+          # Create deployment directories if they don't exist
+          ssh $SERVER_USER@$SERVER_IP "sudo mkdir -p /var/www/html/web /var/www/html/site /opt/unified-app-backend/bin"
 
-          # Set ownership over the directories
-          ssh $SERVER_USER@$SERVER_IP "sudo chown -R $SERVER_USER:$SERVER_USER /var/www/html/web /var/www/html/site ~/app/backend"
+          # Set ownership
+          ssh $SERVER_USER@$SERVER_IP "sudo chown -R $SERVER_USER:$SERVER_USER /var/www/html/web /var/www/html/site /opt/unified-app-backend"
 
-          # Clean up existing dist directories to avoid nesting issues
-          ssh $SERVER_USER@$SERVER_IP "sudo rm -rf /var/www/html/web/* /var/www/html/site/* ~/app/backend/*"
+          # Clean up existing files
+          ssh $SERVER_USER@$SERVER_IP "sudo rm -rf /var/www/html/web/* /var/www/html/site/*"
 
-          # Copy web dist files
+          # Copy web and site dist files
           rsync -avz --delete apps/web/dist/ $SERVER_USER@$SERVER_IP:/var/www/html/web/
-
-          # Copy site dist files
           rsync -avz --delete apps/site/dist/ $SERVER_USER@$SERVER_IP:/var/www/html/site/
 
-          # Copy backend dist files & .env
-          rsync -avz --delete apps/backend/dist/ $SERVER_USER@$SERVER_IP:~/app/backend/
-          rsync -avz apps/backend/.env $SERVER_USER@$SERVER_IP:~/app/backend/.env
+          # Copy backend binary and .env
+          rsync -avz apps/backend/dist/backend $SERVER_USER@$SERVER_IP:/opt/unified-app-backend/bin/
+          rsync -avz apps/backend/.env $SERVER_USER@$SERVER_IP:/opt/unified-app-backend/.env
 
-          # Start/restart PM2 process & reload nginx
+          # Set execute permission on binary
+          ssh $SERVER_USER@$SERVER_IP "chmod +x /opt/unified-app-backend/bin/backend"
+
+          # Restart backend service and reload nginx
           ssh $SERVER_USER@$SERVER_IP << 'EOF'
-            cd ~/app/backend
-            /home/ubuntu/.local/share/pnpm/pm2 restart backend || \
-            /home/ubuntu/.local/share/pnpm/pm2 start ./dist/index.js --name backend --interpreter bun
+            sudo systemctl restart unified-app-backend
             sudo systemctl reload nginx
           EOF
 
-          # Set appropriate permissions for nginx to serve the static apps
+          # Set web permissions
           ssh $SERVER_USER@$SERVER_IP "sudo chown -R www-data:www-data /var/www/html/web /var/www/html/site"
 
       - name: Cleanup

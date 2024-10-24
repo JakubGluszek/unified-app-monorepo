@@ -1,8 +1,8 @@
-import { _Object } from '@aws-sdk/client-s3';
+import { type _Object } from '@aws-sdk/client-s3';
 import { err, ok } from 'neverthrow';
 import { log } from './logger';
 import { createError } from '../errors/s3';
-import { Release } from '../types/release';
+import { type Release } from '../types/release';
 
 const getReleaseIdFromS3Object = (object: _Object) => {
   // Handle error
@@ -38,10 +38,10 @@ export const parseReleaseFromS3Objects = (objects: _Object[]) => {
       if (filename.endsWith('.AppImage')) acc.linux.appImage = filename;
       if (filename.endsWith('.snap')) acc.linux.snap = filename;
       if (filename.endsWith('.exe')) acc.windows.exe = filename;
-      if (filename.endsWith('.dmg')) acc.macos.dmg = filename;
+      if (filename.endsWith('.dmg')) acc.mac.dmg = filename;
       return acc;
     },
-    { linux: {}, windows: {}, macos: {} }
+    { linux: {}, windows: {}, mac: {} }
   );
 
   const result = getReleaseIdFromS3Object(refObject);
