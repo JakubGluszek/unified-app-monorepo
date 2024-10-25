@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "bun run --hot ./src/index.ts",
-    "build": "bun build --compile --minify --sourcemap ./src/index.ts --outfile dist/backend --target=bun-linux-x64-baseline --define process.env.NODE_ENV='\"production\"'",
+    "build": "bun build --compile --minify --sourcemap ./src/index.ts --outfile dist/unified-app-backend --target=bun-linux-x64-baseline --define process.env.NODE_ENV='\"production\"'",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "start": "./dist/backend",
     "clean": "rm -rf ./node_modules/ ./dist/"

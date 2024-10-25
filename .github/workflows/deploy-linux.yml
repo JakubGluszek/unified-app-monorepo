@@ -90,11 +90,11 @@ jobs:
           rsync -avz --delete apps/site/dist/ $SERVER_USER@$SERVER_IP:/var/www/html/site/
 
           # Copy backend binary and .env
-          rsync -avz apps/backend/dist/backend $SERVER_USER@$SERVER_IP:/opt/unified-app-backend/bin/
+          rsync -avz apps/backend/dist/unified-app-backend $SERVER_USER@$SERVER_IP:/opt/unified-app-backend/bin/
           rsync -avz apps/backend/.env $SERVER_USER@$SERVER_IP:/opt/unified-app-backend/.env
 
           # Set execute permission on binary
-          ssh $SERVER_USER@$SERVER_IP "chmod +x /opt/unified-app-backend/bin/backend"
+          ssh $SERVER_USER@$SERVER_IP "chmod +x /opt/unified-app-backend/bin/unified-app-backend"
 
           # Restart backend service and reload nginx
           ssh $SERVER_USER@$SERVER_IP << 'EOF'
