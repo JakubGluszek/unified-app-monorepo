@@ -1,5 +1,6 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
+import { HTTPException } from 'hono/http-exception';
 import { trpcServer } from '@hono/trpc-server';
 
 import { appRouter } from './trpc';
@@ -7,7 +8,6 @@ import { api } from './api';
 
 import logger from './utils/logger';
 import { httpLoggerMiddleware } from './middleware/http-logger-middleware';
-import { HTTPException } from 'hono/http-exception';
 
 const configureCors = () => {
   if (process.env.NODE_ENV === 'production')
@@ -54,9 +54,37 @@ export default {
   port: Bun.env.PORT
 };
 
+import { redisPool } from './lib/redis/pool';
+
 function shutdown() {
   console.log('Shutting down server...');
-  process.exit(0);
+
+  const cleanupTasks = [
+    (async () => {
+      try {
+        await redisPool.shutdown();
+      } catch (error) {
+        logger.error('Error during Redis shutdown', {
+          error: error instanceof Error ? error.message : 'Unknown error'
+        });
+      }
+    })()
+  ];
+
+  Promise.race([
+    Promise.all(cleanupTasks),
+    new Promise((_, reject) => setTimeout(() => reject(new Error('Shutdown timeout')), 5000))
+  ])
+    .then(() => {
+      logger.info('Graceful shutdown completed');
+      process.exit(0);
+    })
+    .catch((error) => {
+      logger.error('Error during shutdown', {
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+      process.exit(1);
+    });
 }
 
 process.on('SIGINT', shutdown); // Handle Ctrl+C

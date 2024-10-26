@@ -1,10 +1,10 @@
 import { type _Object, GetObjectCommand, ListObjectsV2Command, S3Client } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { type StatusCode } from 'hono/utils/http-status';
 import { err, ok, ResultAsync } from 'neverthrow';
+
 import { createS3Error } from '../errors/s3';
-import { getRedisClient, redisPool } from '../utils/redis-client';
 import logger from '../utils/logger';
+import { RedisClient } from '../lib/redis/client';
 
 const s3Client = new S3Client({
   region: Bun.env.AWS_REGION,
@@ -15,6 +15,7 @@ const s3Client = new S3Client({
 });
 
 // Generate a signed URL for a specified S3 object
+// TODO: Wrap in neverthrow ResultAsync.fromPromise
 export const generateSignedUrl = async (key: string, expiresIn: number = 60) => {
   const command = new GetObjectCommand({
     Bucket: Bun.env.S3_BUCKET_NAME!,
@@ -49,19 +50,17 @@ export const listObjects = async ({
   depth?: number;
   exclude?: string[];
 }) => {
-  const redisClient = await getRedisClient();
   const cacheKey = `s3-${prefix}-${depth}`;
 
   // Check if cached data exists
-  const cachedData: string | null = await redisClient.get(cacheKey);
-  if (cachedData) {
+  const cacheResult = await RedisClient.get(cacheKey);
+  if (cacheResult.isErr()) return err(cacheResult.error);
+  if (cacheResult.value) {
     logger.debug('Cache: Retrieving cache for listing objects', { cacheKey });
-    // Release redis client
-    await redisPool.release(redisClient);
-    return ok(JSON.parse(cachedData) as _Object[]);
+    return ok(JSON.parse(cacheResult.value) as _Object[]);
   }
 
-  // Fetch from S3 if no cache
+  // Fetch from S3 if result is not cached
   const result = await ResultAsync.fromPromise(
     s3Client.send(
       new ListObjectsV2Command({
@@ -72,15 +71,10 @@ export const listObjects = async ({
     () => createS3Error('Internal')
   );
 
-  if (result.isErr()) {
-    logger.error(result.error.message);
-    return result;
-  }
+  if (result.isErr()) return err(result.error);
 
   if (!result.value.Contents) {
-    const error = { message: 'No contents found', status: 500 as StatusCode };
-    logger.error(error.message);
-    return err(error);
+    return err(createS3Error('Internal'));
   }
 
   // Filter objects based on depth and key filter
@@ -91,9 +85,8 @@ export const listObjects = async ({
   });
 
   // Cache the result for 1 hour
-  await redisClient.setex(cacheKey, 3600, JSON.stringify(filteredObjects));
-  logger.info('Creating a new cache key', { cacheKey });
+  await RedisClient.set(cacheKey, JSON.stringify(filteredObjects), 3600);
+  logger.debug('Creating a new cache key', { cacheKey });
 
-  await redisPool.release(redisClient);
   return ok(filteredObjects);
 };
