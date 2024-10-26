@@ -15,7 +15,8 @@
     "allowSyntheticDefaultImports": true,
     "types": [
       "vite/client",
-      "bun"
+      "bun",
+      "../backend/bun.d.ts"
     ],
     "paths": {
       "@renderer/*": [

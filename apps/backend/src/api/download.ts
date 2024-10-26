@@ -1,13 +1,14 @@
 import { Hono } from 'hono';
 import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
-import { log } from '../utils/logger';
+import logger from '../utils/logger';
 import { generateSignedUrl } from '../services/s3';
-import { createError } from '../errors/s3';
-import { getRedisClient } from '../redis-client';
+import { createS3Error } from '../errors/s3';
+import { getRedisClient } from '../utils/redis-client';
 import { HTTPException } from 'hono/http-exception';
+import { type Variables } from '../types/context';
 
-const releases = new Hono().get(
+const download = new Hono<{ Variables: Variables }>().get(
   '/:id/:os/:filename',
   zValidator(
     'param',
@@ -25,7 +26,7 @@ const releases = new Hono().get(
     // Check if the signed URL is cached
     const cachedSignedUrl: string | null = await redisClient.get(cacheKey);
     if (cachedSignedUrl) {
-      log({ cache: `Using existing signed URL from cache for "${filename}"` });
+      logger.debug('Cache: Retrieving a signed URL', { filename, cacheKey });
       return c.redirect(cachedSignedUrl);
     }
 
@@ -34,17 +35,20 @@ const releases = new Hono().get(
 
     // Handle error
     if (!signedUrl) {
-      log({ log: `Failed to generate signed URL for "${filename}"` });
-      const error = createError('Internal')
-      throw new HTTPException(error.status, { message: error.message })
+      logger.error('Failed to generate a signed download URL', {
+        filename,
+        requestId: c.get('requestId')
+      });
+      const error = createS3Error('Internal');
+      throw new HTTPException(error.status, { message: error.message });
     }
 
     // Cache the signed URL
     await redisClient.setex(cacheKey, 60, signedUrl);
-    log({ cache: `Creating a new cache entry for signed URL "${cacheKey}"` });
+    logger.debug('Cache: Saving new entry for a signed download URL', { cacheKey });
 
     return c.redirect(signedUrl);
   }
 );
 
-export default releases;
+export default download;

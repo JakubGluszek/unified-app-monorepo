@@ -6,6 +6,7 @@
   },
   "dependencies": {
     "@repo/ui": "workspace:*",
+    "backend": "workspace:*",
     "@electron-toolkit/preload": "catalog:",
     "@tanstack/react-query": "catalog:",
     "@trpc/client": "catalog:",
@@ -17,7 +18,6 @@
     "superjson": "catalog:"
   },
   "devDependencies": {
-    "backend": "workspace:*",
     "@repo/typescript-config": "workspace:*",
     "@types/node": "catalog:",
     "@types/react": "catalog:react18",

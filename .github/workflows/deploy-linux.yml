@@ -61,6 +61,7 @@ jobs:
           echo "S3_BUCKET_NAME=${{ secrets.S3_BUCKET_NAME }}" >> apps/backend/.env
           echo "REDIS_URL=${{ secrets.REDIS_URL }}" >> apps/backend/.env
           echo "AUTH_SECRET_ACCESS_KEY=${{ secrets.AUTH_SECRET_ACCESS_KEY }}" >> apps/backend/.env
+          echo "LOG_LEVEL=info" >> apps/backend/.env
 
       - name: Build backend app (compiled binary)
         run: pnpm --filter backend build
@@ -93,8 +94,8 @@ jobs:
           rsync -avz apps/backend/dist/unified-app-backend $SERVER_USER@$SERVER_IP:/opt/unified-app-backend/bin/
           rsync -avz apps/backend/.env $SERVER_USER@$SERVER_IP:/opt/unified-app-backend/.env
 
-          # Set execute permission on binary
-          ssh $SERVER_USER@$SERVER_IP "chmod +x /opt/unified-app-backend/bin/unified-app-backend"
+          # Set binary to executable & restrict .env file permissions
+          ssh $SERVER_USER@$SERVER_IP "chmod +x /opt/unified-app-backend/bin/unified-app-backend && chmod 600 /opt/unified-app-backend/.env"
 
           # Restart backend service and reload nginx
           ssh $SERVER_USER@$SERVER_IP << 'EOF'

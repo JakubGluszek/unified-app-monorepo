@@ -5,8 +5,6 @@ import icon from '../../resources/icon.png?asset';
 
 let mainWindow: BrowserWindow;
 
-console.log(app.getVersion());
-
 function createWindow(): void {
   // Create the browser window.
   mainWindow = new BrowserWindow({
@@ -83,7 +81,7 @@ app.whenReady().then(() => {
 
   createWindow();
 
-  app.on('activate', function () {
+  app.on('activate', function() {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) createWindow();

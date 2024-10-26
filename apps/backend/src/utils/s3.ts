@@ -1,8 +1,8 @@
 import { type _Object } from '@aws-sdk/client-s3';
 import { err, ok } from 'neverthrow';
-import { log } from './logger';
-import { createError } from '../errors/s3';
+import { createS3Error } from '../errors/s3';
 import { type Release } from '../types/release';
+import logger from './logger';
 
 const getReleaseIdFromS3Object = (object: _Object) => {
   // Handle error
@@ -11,12 +11,12 @@ const getReleaseIdFromS3Object = (object: _Object) => {
       message: "Release ID couldn't be determined when parsing S3 objects",
       status: 500
     }).mapErr((error) => {
-      log(error.message);
+      logger.error(error.message);
       return error;
     });
 
   const releaseId = object.Key.split('/')[2];
-  if (!releaseId) return err(createError('Internal'));
+  if (!releaseId) return err(createS3Error('Internal'));
   return ok(releaseId);
 };
 
@@ -24,8 +24,8 @@ export const parseReleaseFromS3Objects = (objects: _Object[]) => {
   const refObject = objects[0];
 
   if (!refObject)
-    return err(createError('Internal')).mapErr((error) => {
-      log({ error });
+    return err(createS3Error('Internal')).mapErr((error) => {
+      logger.error(error.message);
       return error;
     });
 

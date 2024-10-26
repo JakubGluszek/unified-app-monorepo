@@ -1,9 +1,11 @@
-declare namespace NodeJS {
-  interface ProcessEnv {
-    readonly PORT: string;
-    readonly AWS_REGION: string;
-    readonly AWS_ACCESS_KEY_ID: string;
-    readonly AWS_SECRET_ACCESS_KEY: string;
-    readonly AUTH_SECRET_ACCESS_KEY: string;
+declare module 'bun' {
+  interface Env {
+    PORT: string;
+    AWS_REGION: string;
+    AWS_ACCESS_KEY_ID: string;
+    AWS_SECRET_ACCESS_KEY: string;
+    S3_BUCKET_NAME: string;
+    AUTH_SECRET_ACCESS_KEY: string;
+    LOG_LEVEL?: 'info' | 'debug';
   }
 }

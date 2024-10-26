@@ -10,4 +10,4 @@ export const s3Error = {
 export type S3ErrorType = keyof typeof s3Error;
 export type S3ErrorResponse = (typeof s3Error)[S3ErrorType];
 
-export const createError = (type: S3ErrorType): S3ErrorResponse => s3Error[type];
+export const createS3Error = (type: S3ErrorType): S3ErrorResponse => s3Error[type];

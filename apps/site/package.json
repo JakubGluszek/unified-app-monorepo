@@ -16,6 +16,7 @@
     "@astrojs/tailwind": "^5.1.2",
     "@repo/shared": "workspace:*",
     "@repo/ui": "workspace:*",
+    "backend": "workspace:*",
     "@tanstack/react-query": "catalog:",
     "@types/react": "catalog:react18",
     "@types/react-dom": "catalog:react18",
@@ -29,6 +30,7 @@
     "typescript": "catalog:"
   },
   "devDependencies": {
+    "@types/bun": "latest",
     "@types/lodash": "^4.17.12",
     "prettier": "catalog:",
     "prettier-plugin-astro": "^0.14.1"

@@ -1,13 +1,15 @@
 import Redis from 'ioredis';
 import { createPool } from 'generic-pool';
 
+import logger from '../utils/logger';
+
 const redisUrl = process.env.REDIS_URL || 'redis://localhost:6379';
 
 // Create a Redis client factory
 const factory = {
   create: async () => {
     const client = new Redis(redisUrl);
-    client.on('error', (err) => console.error('Redis connection error:', err));
+    client.on('error', (err) => logger.error('Redis connection error:', err));
     return client;
   },
   destroy: async (client: Redis) => {
@@ -27,7 +29,7 @@ export const getRedisClient = async () => {
   return await redisPool.acquire();
 };
 
-// Optionally handle cleanup
+// Handle cleanup
 process.on('SIGINT', async () => {
   await redisPool.drain();
   await redisPool.clear();

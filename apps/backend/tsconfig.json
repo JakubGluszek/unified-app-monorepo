@@ -7,7 +7,10 @@
     "declaration": true,
     "declarationMap": true,
     "skipLibCheck": true,
-    "baseUrl": ".",
+    "esModuleInterop": true,
+    "baseUrl": "./src",
+    "composite": true,
+    "incremental": true,
     "types": [
       "bun"
     ]

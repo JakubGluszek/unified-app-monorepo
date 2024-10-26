@@ -1,5 +1,5 @@
 import { hc } from 'hono/client';
-import type { ApiRouter } from 'backend/src/routes/index';
+import type { ApiRouter } from 'backend';
 
 export const createClient = (baseApiUrl: string) =>
   hc<ApiRouter>(baseApiUrl + '/api', {

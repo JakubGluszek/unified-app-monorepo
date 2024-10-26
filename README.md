@@ -35,6 +35,7 @@ This monorepo contains a shared React package (`@repo/app`) that adapts to diffe
   /web
   /desktop
   /backend
+  /site
 /packages
   /app
   /ui (shadcn/ui components)
