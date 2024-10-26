@@ -8,11 +8,7 @@
     "incremental": false,
     "isolatedModules": true,
     "jsx": "react-jsx",
-    "lib": [
-      "es2022",
-      "DOM",
-      "DOM.Iterable"
-    ],
+    "lib": ["es2022", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "moduleResolution": "bundler",
     "noUncheckedIndexedAccess": true,

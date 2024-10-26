@@ -1,6 +1,6 @@
 import { type Result, ok, err } from 'neverthrow';
 
-import logger from '../../utils/logger';
+import logger from '../../helpers/logger';
 import { REDIS_CONFIG } from '../../config/redis';
 import { RedisOperationError } from './errors';
 

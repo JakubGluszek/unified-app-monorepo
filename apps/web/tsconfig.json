@@ -5,16 +5,8 @@
     "outDir": "./dist",
     "emitDeclarationOnly": true,
     "moduleResolution": "bundler",
-    "types": [
-      "vite/client",
-      "bun",
-      "../backend/bun.d.ts"
-    ]
+    "types": ["vite/client", "bun", "../backend/bun.d.ts"]
   },
-  "include": [
-    "src"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+  "include": ["src"],
+  "exclude": ["node_modules"]
 }

@@ -13,15 +13,9 @@
     "esModuleInterop": true,
     "moduleResolution": "bundler",
     "allowSyntheticDefaultImports": true,
-    "types": [
-      "vite/client",
-      "bun",
-      "../backend/bun.d.ts"
-    ],
+    "types": ["vite/client", "bun", "../backend/bun.d.ts"],
     "paths": {
-      "@renderer/*": [
-        "src/renderer/src/*"
-      ]
+      "@renderer/*": ["src/renderer/src/*"]
     }
   }
 }

@@ -5,7 +5,7 @@ import { z } from 'zod';
 
 import { listObjects } from '../services/s3';
 import { parseReleasesFromS3Objects, parseReleaseFromS3Objects } from '../utils/s3';
-import logger from '../utils/logger';
+import logger from '../helpers/logger';
 import { RedisClient } from '../lib/redis/client';
 import { type Variables } from '../types/context';
 

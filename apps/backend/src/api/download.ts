@@ -3,7 +3,7 @@ import { HTTPException } from 'hono/http-exception';
 import { zValidator } from '@hono/zod-validator';
 import { z } from 'zod';
 
-import logger from '../utils/logger';
+import logger from '../helpers/logger';
 import { generateSignedUrl } from '../services/s3';
 import { createS3Error } from '../errors/s3';
 import { type Variables } from '../types/context';

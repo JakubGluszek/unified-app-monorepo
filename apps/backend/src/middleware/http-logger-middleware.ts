@@ -1,7 +1,7 @@
 import { type Context, type Next } from 'hono';
 import { getConnInfo } from 'hono/bun';
 
-import logger from '../utils/logger';
+import logger from '../helpers/logger';
 
 export const httpLoggerMiddleware = async (c: Context, next: Next) => {
   // Ignore CORS preflight requests

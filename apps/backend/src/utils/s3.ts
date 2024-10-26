@@ -1,8 +1,9 @@
 import { type _Object } from '@aws-sdk/client-s3';
 import { err, ok } from 'neverthrow';
+
 import { createS3Error } from '../errors/s3';
 import { type Release } from '../types/release';
-import logger from './logger';
+import logger from '../helpers/logger';
 
 const getReleaseIdFromS3Object = (object: _Object) => {
   // Handle error

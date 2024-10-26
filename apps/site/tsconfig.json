@@ -3,9 +3,6 @@
   "compilerOptions": {
     "jsx": "react-jsx",
     "jsxImportSource": "react",
-    "types": [
-      "bun",
-      "../backend/bun.d.ts"
-    ]
+    "types": ["bun", "../backend/bun.d.ts"]
   }
 }

@@ -3,7 +3,7 @@ import { createPool, type Factory, type Pool } from 'generic-pool';
 import { err, ok, Result } from 'neverthrow';
 
 import { REDIS_CONFIG } from '../../config/redis';
-import logger from '../../utils/logger';
+import logger from '../../helpers/logger';
 import { RedisConnectionError } from './errors';
 
 const url = new URL(REDIS_CONFIG.url);

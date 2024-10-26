@@ -6,10 +6,10 @@ const config: Config = merge({}, uiConfig, {
   theme: {
     extend: {
       fontFamily: {
-        mono: ['DepartureMono', 'monospace'],
-      },
-    },
-  },
+        mono: ['DepartureMono', 'monospace']
+      }
+    }
+  }
 });
 
 export default config;

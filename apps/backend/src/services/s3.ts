@@ -3,7 +3,7 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { err, ok, ResultAsync } from 'neverthrow';
 
 import { createS3Error } from '../errors/s3';
-import logger from '../utils/logger';
+import logger from '../helpers/logger';
 import { RedisClient } from '../lib/redis/client';
 
 const s3Client = new S3Client({

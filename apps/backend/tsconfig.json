@@ -11,16 +11,8 @@
     "baseUrl": "./src",
     "composite": true,
     "incremental": true,
-    "types": [
-      "bun"
-    ]
+    "types": ["bun"]
   },
-  "include": [
-    "src/**/*",
-    "bun.d.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist"
-  ]
+  "include": ["src/**/*", "bun.d.ts"],
+  "exclude": ["node_modules", "dist"]
 }
